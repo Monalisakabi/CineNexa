@@ -1,0 +1,193 @@
+<div class="admin-dashboard">
+
+  <!-- SIDEBAR -->
+  <aside class="admin-sidebar">
+
+    <a routerLink="/admin-dashboard" class="admin-brand">
+      <span class="brand-icon">S</span>
+      SMART<span>TICKET</span>
+    </a>
+
+    <div class="admin-profile">
+      <div class="admin-avatar">A</div>
+      <h3>Administrator</h3>
+      <p>System Management</p>
+      <span>ADMIN ACCOUNT</span>
+    </div>
+
+    <nav class="admin-nav">
+
+      <a routerLink="/admin-dashboard" class="active">
+        <span>📊</span> Dashboard Overview
+      </a>
+
+      <a routerLink="/admin">
+        <span>🎬</span> Movie Management
+      </a>
+
+      <a routerLink="/admin">
+        <span>🏢</span> Theater Management
+      </a>
+
+      <a routerLink="/admin">
+        <span>🖥️</span> Screen Management
+      </a>
+
+      <a routerLink="/admin">
+        <span>🎟️</span> Show Management
+      </a>
+
+     <a routerLink="/admin-bookings">
+  <span>📋</span> Booking Management
+</a>
+<a routerLink="/admin-customers">
+  <span>👥</span> Customer Management
+</a>
+
+    </nav>
+
+    <div class="sidebar-bottom">
+
+      <a routerLink="/movies">← View Customer Website</a>
+
+      <button class="logout-button" (click)="logout()">
+        🚪 Logout
+      </button>
+
+    </div>
+
+  </aside>
+
+
+  <!-- MAIN CONTENT -->
+  <main class="admin-main">
+
+    <!-- HEADER -->
+    <header class="admin-topbar">
+
+      <div>
+        <span class="eyebrow">ADMINISTRATION</span>
+        <h1>Dashboard Overview</h1>
+        <p>Monitor and manage your SmartTicket platform.</p>
+      </div>
+
+      <button class="refresh-button" (click)="loadAdminStats()">
+        ↻ Refresh
+      </button>
+
+    </header>
+
+
+    <!-- ERROR -->
+    <div class="error-message" *ngIf="errorMessage">
+      {{ errorMessage }}
+    </div>
+
+
+    <!-- LOADING -->
+    <p class="loading-message" *ngIf="loading">
+      Loading dashboard statistics...
+    </p>
+
+
+    <!-- STATISTICS -->
+    <section class="stats-grid" *ngIf="!loading">
+
+      <div class="stat-card purple">
+        <div class="stat-icon">🎬</div>
+        <div>
+          <h3>{{ moviesCount }}</h3>
+          <p>Total Movies</p>
+        </div>
+      </div>
+
+      <div class="stat-card blue">
+        <div class="stat-icon">🏢</div>
+        <div>
+          <h3>{{ theatersCount }}</h3>
+          <p>Total Theaters</p>
+        </div>
+      </div>
+
+      <div class="stat-card orange">
+        <div class="stat-icon">🖥️</div>
+        <div>
+          <h3>{{ screensCount }}</h3>
+          <p>Total Screens</p>
+        </div>
+      </div>
+
+      <div class="stat-card green">
+        <div class="stat-icon">🎟️</div>
+        <div>
+          <h3>{{ showsCount }}</h3>
+          <p>Scheduled Shows</p>
+        </div>
+      </div>
+
+    </section>
+
+
+    <!-- MANAGEMENT SECTION -->
+    <section class="management-section">
+
+      <div class="section-heading">
+        <h2>Management Center</h2>
+        <p>Select a section to manage your platform.</p>
+      </div>
+
+      <div class="management-grid">
+
+        <a routerLink="/admin-bookings" class="management-card">
+  <div class="card-icon pink">📋</div>
+  <h3>Booking Management</h3>
+  <p>View and monitor customer ticket bookings.</p>
+  <span>Manage Bookings →</span>
+</a>
+
+        <a routerLink="/admin" class="management-card">
+          <div class="card-icon blue">🏢</div>
+          <h3>Theater Management</h3>
+          <p>Manage theater names and locations.</p>
+          <span>Manage Theaters →</span>
+        </a>
+
+        <a routerLink="/admin" class="management-card">
+          <div class="card-icon orange">🖥️</div>
+          <h3>Screen Management</h3>
+          <p>Configure screens and seating capacity.</p>
+          <span>Manage Screens →</span>
+        </a>
+
+        <a routerLink="/admin" class="management-card">
+          <div class="card-icon green">🎟️</div>
+          <h3>Show Management</h3>
+          <p>Schedule movies, dates, times and screens.</p>
+          <span>Manage Shows →</span>
+        </a>
+
+        <a routerLink="/admin" class="management-card">
+  <div class="card-icon cyan">🎬</div>
+  <h3>Movie Management</h3>
+  <p>Add, update and manage movies.</p>
+  <span>Manage Movies →</span>
+</a>
+
+       <a routerLink="/admin-customers" class="management-card">
+  <div class="card-icon cyan">👥</div>
+  <h3>Customer Management</h3>
+  <p>View registered customer information.</p>
+  <span>Manage Customers →</span>
+</a>
+
+      </div>
+
+    </section>
+
+    <footer class="admin-footer">
+      © 2026 SmartTicket Administration Panel
+    </footer>
+
+  </main>
+
+</div>

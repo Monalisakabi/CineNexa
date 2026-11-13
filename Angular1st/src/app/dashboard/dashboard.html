@@ -1,0 +1,416 @@
+<div class="customer-dashboard">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+
+    <a routerLink="/movies" class="brand">
+      <span class="brand-icon">S</span>
+      SMART<span class="highlight">TICKET</span>
+    </a>
+
+    <div class="user-info">
+      <div class="user-avatar">
+        {{ userName.charAt(0).toUpperCase() }}
+      </div>
+
+      <h3>{{ userName }}</h3>
+      <p>{{ userEmail }}</p>
+      <span class="customer-label">CUSTOMER ACCOUNT</span>
+    </div>
+
+    <nav class="sidebar-nav">
+
+      <button
+        [class.active]="activeSection === 'overview'"
+        (click)="setActiveSection('overview')">
+        <span>🏠</span> Overview
+      </button>
+
+      <a routerLink="/movies">
+        <span>🎬</span> Browse Movies
+      </a>
+
+      <button
+        [class.active]="activeSection === 'bookings'"
+        (click)="setActiveSection('bookings')">
+        <span>🎟️</span> My Bookings
+      </button>
+
+      <button
+        [class.active]="activeSection === 'history'"
+        (click)="setActiveSection('history')">
+        <span>📋</span> Booking History
+      </button>
+
+      <button
+        [class.active]="activeSection === 'profile'"
+        (click)="setActiveSection('profile')">
+        <span>👤</span> My Profile
+      </button>
+
+    </nav>
+
+    <div class="sidebar-bottom">
+      <a routerLink="/movies">
+        ← Back to Movies
+      </a>
+
+      <button class="logout-btn" (click)="logout()">
+        🚪 Logout
+      </button>
+    </div>
+
+  </aside>
+
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content">
+
+    <!-- TOP HEADER -->
+    <header class="top-header">
+      <div>
+        <span class="welcome-label">CUSTOMER DASHBOARD</span>
+        <h1>Welcome back, {{ userName }}!</h1>
+        <p>Manage your bookings and enjoy your movie experience.</p>
+      </div>
+
+      <button class="refresh-btn" (click)="loadBookings()">
+        ↻ Refresh
+      </button>
+    </header>
+
+
+    <!-- OVERVIEW SECTION -->
+    <section *ngIf="activeSection === 'overview'">
+
+      <div class="stats-grid">
+
+        <div class="stat-card total">
+          <div class="stat-icon">🎟️</div>
+          <div>
+            <h3>{{ bookings.length }}</h3>
+            <p>Total Bookings</p>
+          </div>
+        </div>
+
+        <div class="stat-card confirmed">
+          <div class="stat-icon">✓</div>
+          <div>
+            <h3>{{ confirmedCount }}</h3>
+            <p>Confirmed</p>
+          </div>
+        </div>
+
+        <div class="stat-card cancelled">
+          <div class="stat-icon">✕</div>
+          <div>
+            <h3>{{ cancelledCount }}</h3>
+            <p>Cancelled</p>
+          </div>
+        </div>
+
+        <div class="stat-card upcoming">
+          <div class="stat-icon">🎬</div>
+          <div>
+            <h3>{{ upcomingCount }}</h3>
+            <p>Upcoming Shows</p>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="quick-actions">
+
+        <h2>Quick Actions</h2>
+
+        <div class="action-grid">
+
+          <a routerLink="/movies" class="action-card">
+            <span>🎬</span>
+            <h3>Browse Movies</h3>
+            <p>Discover movies and book your favourite seats.</p>
+            <strong>Explore Movies →</strong>
+          </a>
+
+          <button class="action-card" (click)="setActiveSection('bookings')">
+            <span>🎟️</span>
+            <h3>My Bookings</h3>
+            <p>Check your upcoming movie reservations.</p>
+            <strong>View Bookings →</strong>
+          </button>
+
+          <button class="action-card" (click)="setActiveSection('profile')">
+            <span>👤</span>
+            <h3>My Profile</h3>
+            <p>View your customer account information.</p>
+            <strong>View Profile →</strong>
+          </button>
+
+        </div>
+
+      </div>
+
+      <section class="booking-section">
+
+        <div class="section-heading">
+          <div>
+            <h2>Recent Bookings</h2>
+            <p>Your latest movie reservations.</p>
+          </div>
+
+          <button class="view-all" (click)="setActiveSection('history')">
+            View All →
+          </button>
+        </div>
+
+        <p *ngIf="loading" class="message">
+          Loading your bookings...
+        </p>
+
+        <p *ngIf="errorMessage" class="error-message">
+          {{ errorMessage }}
+        </p>
+
+        <p *ngIf="!loading && !errorMessage && bookings.length === 0"
+           class="message">
+          No bookings yet. Browse movies to book your first ticket!
+        </p>
+
+        <div class="recent-booking" *ngFor="let booking of bookings.slice(0, 3)">
+          <div>
+            <strong>{{ booking.movieTitle }}</strong>
+            <p>{{ booking.showDate | date:'dd MMM yyyy' }} · {{ booking.showTime }}</p>
+          </div>
+
+          <span class="status-badge"
+                [ngClass]="booking.status.toLowerCase()">
+            {{ booking.status }}
+          </span>
+        </div>
+
+      </section>
+
+    </section>
+
+
+    <!-- MY BOOKINGS SECTION -->
+    <section *ngIf="activeSection === 'bookings'" class="booking-section">
+
+      <h2>My Bookings</h2>
+      <p>View your confirmed and upcoming reservations.</p>
+
+      <p *ngIf="loading" class="message">Loading bookings...</p>
+
+      <div class="recent-booking"
+           *ngFor="let booking of bookings">
+
+        <div>
+          <strong>{{ booking.movieTitle }}</strong>
+          <p>
+            {{ booking.showDate | date:'dd MMM yyyy' }}
+            · {{ booking.showTime }}
+            · Seats: {{ booking.seatNumbers.join(', ') }}
+          </p>
+          <small>Booking #{{ booking.bookingId }}</small>
+        </div>
+
+        <span class="status-badge"
+              [ngClass]="booking.status.toLowerCase()">
+          {{ booking.status }}
+        </span>
+
+      </div>
+
+      <p *ngIf="!loading && bookings.length === 0" class="message">
+        You have no bookings yet.
+      </p>
+
+    </section>
+
+
+    <!-- BOOKING HISTORY SECTION -->
+    <section *ngIf="activeSection === 'history'" class="booking-section">
+
+      <div class="section-heading">
+        <div>
+          <h2>My Booking History</h2>
+          <p>All your movie ticket bookings in one place.</p>
+        </div>
+      </div>
+
+      <p *ngIf="loading" class="message">Loading your bookings...</p>
+
+      <p *ngIf="errorMessage" class="error-message">
+        {{ errorMessage }}
+      </p>
+
+      <p *ngIf="!loading && !errorMessage && bookings.length === 0"
+         class="message">
+        You haven't made any bookings yet.
+      </p>
+
+      <div class="table-wrapper" *ngIf="!loading && bookings.length > 0">
+
+        <table>
+          <thead>
+            <tr>
+              <th>Movie</th>
+              <th>Show Date</th>
+              <th>Show Time</th>
+              <th>Seats</th>
+              <th>Amount</th>
+              <th>Status</th>
+              <th>Booking ID</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <tr *ngFor="let booking of bookings">
+
+              <td>
+                <div class="movie-info">
+                  <img
+                    *ngIf="booking.moviePoster"
+                    [src]="booking.moviePoster"
+                    [alt]="booking.movieTitle"
+                    class="movie-poster">
+
+                  <div class="poster-placeholder"
+                       *ngIf="!booking.moviePoster">
+                    🎬
+                  </div>
+
+                  <strong>{{ booking.movieTitle }}</strong>
+                </div>
+              </td>
+
+              <td>{{ booking.showDate | date:'dd MMM yyyy' }}</td>
+              <td>{{ booking.showTime }}</td>
+
+              <td>
+                <span class="seat-badge"
+                      *ngFor="let seat of booking.seatNumbers">
+                  {{ seat }}
+                </span>
+              </td>
+
+              <td>₹{{ booking.totalAmount | number:'1.2-2' }}</td>
+
+              <td>
+                <span class="status-badge"
+                      [ngClass]="booking.status.toLowerCase()">
+                  {{ booking.status }}
+                </span>
+              </td>
+
+              <td>#{{ booking.bookingId }}</td>
+              <td>
+  <button
+    *ngIf="booking.status === 'CONFIRMED'"
+    type="button"
+    class="cancel-booking-btn"
+    (click)="cancelBooking(booking.bookingId)">
+    Cancel Booking
+  </button>
+
+  <span *ngIf="booking.status === 'CANCELLED'">
+    Cancelled
+  </span>
+</td>
+            </tr>
+          </tbody>
+        </table>
+
+      </div>
+
+    </section>
+
+
+    <!-- MY PROFILE SECTION -->
+   <!-- MY PROFILE SECTION -->
+<section *ngIf="activeSection === 'profile'" class="booking-section">
+
+  <h2>My Profile</h2>
+  <p>Manage your customer account information.</p>
+
+  <div class="profile-card">
+
+    <div class="profile-avatar">
+      {{ userName.charAt(0).toUpperCase() }}
+    </div>
+
+    <div class="profile-detail">
+      <label>Full Name</label>
+
+      <input
+        *ngIf="isEditingProfile"
+        type="text"
+        [(ngModel)]="userName"
+        placeholder="Enter your name"
+      />
+
+      <h3 *ngIf="!isEditingProfile">{{ userName }}</h3>
+    </div>
+
+    <div class="profile-detail">
+      <label>Email Address</label>
+      <h3>{{ userEmail }}</h3>
+    </div>
+
+    <div class="profile-detail">
+      <label>Phone Number</label>
+
+      <input
+        *ngIf="isEditingProfile"
+        type="tel"
+        [(ngModel)]="userPhone"
+        placeholder="Enter phone number"
+      />
+
+      <h3 *ngIf="!isEditingProfile">
+        {{ userPhone || 'Not provided' }}
+      </h3>
+    </div>
+
+    <div class="profile-detail">
+      <label>Account Type</label>
+      <h3>Customer</h3>
+    </div>
+
+    <p class="success-message" *ngIf="profileMessage">
+      {{ profileMessage }}
+    </p>
+
+    <p class="error-message" *ngIf="profileError">
+      {{ profileError }}
+    </p>
+
+    <button
+      *ngIf="!isEditingProfile"
+      class="refresh-btn"
+      (click)="isEditingProfile = true">
+      ✏️ Edit Profile
+    </button>
+
+    <div *ngIf="isEditingProfile" class="profile-actions">
+
+      <button class="refresh-btn" (click)="updateProfile()">
+        Save Changes
+      </button>
+
+      <button
+        class="cancel-edit-btn"
+        (click)="isEditingProfile = false">
+        Cancel
+      </button>
+
+    </div>
+
+  </div>
+
+</section>
+
+  </main>
+
+</div>

@@ -1,0 +1,511 @@
+<div class="app-shell">
+
+  <!-- NAVBAR -->
+  <header class="topbar">
+
+    <div class="brand">
+      <div class="brand-icon">S</div>
+      <span>SMART<span class="brand-highlight">TICKET</span></span>
+    </div>
+
+    <div class="topbar-right">
+      <span class="secure-label">● Secure Booking</span>
+    </div>
+
+  </header>
+
+  <main class="main-content">
+
+    <!-- HERO SECTION -->
+    <section class="hero">
+
+      <div class="hero-tag">
+        YOUR NEXT EXPERIENCE STARTS HERE
+      </div>
+
+      <h1>Book your <span>perfect seat.</span></h1>
+
+      <p>
+        Choose your seat, secure your booking and enjoy the show.
+      </p>
+
+    </section>
+
+    <!-- STATUS MESSAGE -->
+    <div
+      class="status-message"
+      [class.error]="message().toLowerCase().includes('failed')">
+
+      <span class="status-dot"></span>
+      {{ message() }}
+
+    </div>
+
+
+    <!-- SEAT SELECTION AND BOOKING SUMMARY -->
+    @if (!booking()) {
+
+      <section class="booking-layout">
+
+        <!-- SEAT SECTION -->
+        <div class="seat-section">
+
+          <div class="section-heading">
+
+            <div>
+              <span class="eyebrow">SELECT YOUR SEAT</span>
+              <h2>Choose your spot</h2>
+            </div>
+
+            <span class="seat-count">
+              {{ seats().length }} Seats
+            </span>
+
+          </div>
+
+          <div class="cinema">
+
+            <!-- CINEMA SCREEN -->
+            <div class="screen-area">
+
+              <div class="screen-glow"></div>
+              <div class="screen-shape"></div>
+
+              <span>SCREEN</span>
+
+            </div>
+
+            <!-- SEAT LEGEND -->
+            <div class="seat-legend">
+
+              <div>
+                <span class="legend-seat available"></span>
+                Available
+              </div>
+
+              <div>
+                <span class="legend-seat selected"></span>
+                Selected
+              </div>
+
+              <div>
+                <span class="legend-seat booked"></span>
+                Booked
+              </div>
+
+            </div>
+
+            <!-- SEAT GRID -->
+            <div class="seat-grid">
+
+              @for (seat of seats(); track seat.seatId) {
+
+                <button
+                  type="button"
+                  class="seat"
+
+                  [class.selected]="selectedSeat()?.seatId === seat.seatId"
+
+                  [class.unavailable]="seat.status !== 'AVAILABLE'"
+
+                  [disabled]="
+                    seat.status !== 'AVAILABLE' ||
+                    isLocking() ||
+                    isCheckingOut()
+                  "
+
+                  (click)="selectSeat(seat)">
+
+                  <span class="seat-number">
+                    {{ seat.seatNumber }}
+                  </span>
+
+                  <small>₹{{ seat.price }}</small>
+
+                </button>
+
+              }
+
+            </div>
+
+            <p class="screen-caption">
+              ALL EYES THIS WAY
+            </p>
+
+          </div>
+
+        </div>
+
+
+        <!-- BOOKING SUMMARY -->
+        <aside class="checkout-panel">
+
+          <span class="eyebrow">YOUR ORDER</span>
+
+          <h2>Booking summary</h2>
+
+          @if (selectedSeat(); as seat) {
+
+            <div class="selected-card">
+
+              <div>
+                <span class="muted-label">SELECTED SEAT</span>
+                <h3>{{ seat.seatNumber }}</h3>
+              </div>
+
+              <span class="selected-badge">SELECTED</span>
+
+            </div>
+
+            <div class="summary-row">
+              <span>Seat category</span>
+              <strong>{{ seat.seatTier }}</strong>
+            </div>
+
+            <div class="summary-row">
+              <span>Ticket price</span>
+              <strong>₹{{ seat.price }}</strong>
+            </div>
+
+            <div class="summary-divider"></div>
+
+            <div class="total-row">
+              <span>Total amount</span>
+              <strong>₹{{ seat.price }}</strong>
+            </div>
+
+            <!-- OPEN PAYMENT OPTIONS -->
+            <button
+              type="button"
+              class="primary-button"
+              (click)="openPaymentOptions()"
+              [disabled]="isCheckingOut() || !lockToken()">
+
+              Continue to Payment <span>→</span>
+
+            </button>
+
+            <!-- RELEASE SEAT -->
+            <button
+              type="button"
+              class="release-button"
+              (click)="releaseSeat()"
+              [disabled]="isCheckingOut() || !lockToken()">
+
+              Release selected seat
+
+            </button>
+
+          } @else {
+
+            <div class="empty-selection">
+
+              <div class="empty-icon">✦</div>
+
+              <h3>No seat selected</h3>
+
+              <p>
+                Select an available seat to see your booking summary.
+              </p>
+
+            </div>
+
+          }
+
+          <div class="secure-note">
+            <span>✓</span>
+
+            <p>
+              Secure seat reservation with temporary locking.
+            </p>
+          </div>
+
+          <p class="test-note">
+  Secure payment powered by Razorpay Test Mode.
+  No real money will be charged.
+</p>
+
+        </aside>
+
+      </section>
+
+    }
+
+
+    <!-- PAYMENT METHOD MODAL -->
+    @if (paymentOptionsOpen()) {
+
+      <div class="payment-overlay">
+
+        <div class="payment-modal">
+
+          <!-- CLOSE BUTTON -->
+          <button
+            type="button"
+            class="close-payment"
+            (click)="closePaymentOptions()">
+
+            ✕
+
+          </button>
+
+          <span class="eyebrow">SECURE CHECKOUT</span>
+
+          <h2>Choose Payment Method</h2>
+
+          <p class="payment-description">
+            Select your preferred payment option.
+          </p>
+
+
+          <!-- PAYMENT AMOUNT -->
+          <div class="payment-amount">
+
+            <span>AMOUNT TO PAY</span>
+
+            @if (selectedSeat(); as seat) {
+              <strong>₹{{ seat.price }}</strong>
+            }
+
+          </div>
+
+
+          <!-- PAYMENT METHODS -->
+          <div class="payment-methods">
+
+            @for (method of paymentMethods; track method.id) {
+
+              <button
+                type="button"
+                class="payment-option"
+
+                [class.active]="selectedPaymentMethod() === method.id"
+
+                (click)="choosePaymentMethod(method.id)">
+
+                <span class="payment-icon">
+                  {{ method.icon }}
+                </span>
+
+                <span class="payment-name">
+                  {{ method.name }}
+                </span>
+
+                <span class="radio-circle">
+
+                  @if (selectedPaymentMethod() === method.id) {
+                    ✓
+                  }
+
+                </span>
+
+              </button>
+
+            }
+
+          </div>
+
+
+          <!-- UPI QR DEMO -->
+          @if (selectedPaymentMethod() === 'UPI') {
+
+            <div class="qr-demo">
+
+              <div class="qr-placeholder">
+                DEMO
+              </div>
+
+              <strong>UPI QR Payment</strong>
+
+              <p>
+  Complete your UPI payment securely through Razorpay Checkout.
+</p>
+
+            </div>
+
+          }
+
+
+          <!-- CARD DEMO -->
+          @if (selectedPaymentMethod() === 'CARD') {
+
+            <div class="card-demo">
+
+              <strong>Card Payment</strong>
+<p>
+  Complete your card payment securely through Razorpay Checkout.
+</p>
+
+              <small>
+                Do not enter real card details in development mode.
+              </small>
+
+            </div>
+
+          }
+
+
+          <!-- GOOGLE PAY / PHONEPE / PAYTM DEMO -->
+          @if (
+            selectedPaymentMethod() === 'GOOGLE_PAY' ||
+            selectedPaymentMethod() === 'PHONEPE' ||
+            selectedPaymentMethod() === 'PAYTM'
+          ) {
+
+            <div class="upi-demo">
+
+              <strong>
+                {{
+                  selectedPaymentMethod() === 'GOOGLE_PAY'
+                    ? 'Google Pay'
+                    : selectedPaymentMethod() === 'PHONEPE'
+                      ? 'PhonePe'
+                      : 'Paytm'
+                }}
+              </strong>
+
+             <p>
+  Complete your payment securely through Razorpay Checkout.
+</p>
+
+            </div>
+
+          }
+
+
+          <!-- CONTINUE PAYMENT -->
+          <button
+            type="button"
+            class="primary-button pay-now"
+
+            (click)="checkout()"
+
+            [disabled]="
+              !selectedPaymentMethod() ||
+              isCheckingOut()
+            ">
+
+            Pay Securely with Razorpay →
+
+          </button>
+
+          <p class="demo-warning">
+  Razorpay Test Mode: No real money will be charged.
+</p>
+
+        </div>
+
+
+      </div>
+
+    }
+
+
+    <!-- BOOKING CONFIRMATION -->
+@if (booking(); as bookingDetails) {
+  @if (bookingDetails.status === 'CONFIRMED') {
+       <section class="confirmation">
+
+        <div class="success-icon">✓</div>
+
+        <span class="eyebrow">BOOKING SUMMARY</span>
+
+        <h2>Your booking details</h2>
+
+        <p class="confirmation-subtitle">
+          Your booking and payment information is shown below.
+        </p>
+
+
+        <!-- BOOKING INFORMATION -->
+        <div class="confirmation-details">
+
+          <div>
+            <span>BOOKING ID</span>
+            <strong>#{{ bookingDetails.bookingId }}</strong>
+          </div>
+
+          <div>
+            <span>SEAT</span>
+
+          <strong>
+  {{ selectedSeat()?.seatNumber || 'N/A' }}
+</strong>
+          </div>
+
+          <div>
+            <span>TOTAL AMOUNT</span>
+            <strong>₹{{ bookingDetails.totalAmount }}</strong>
+          </div>
+
+          <div>
+            <span>BOOKING STATUS</span>
+            <strong>{{ bookingDetails.status }}</strong>
+          </div>
+
+        </div>
+
+
+        <!-- PAYMENT INFORMATION -->
+        @if (payment(); as paymentDetails) {
+
+          <h3 class="payment-heading">
+            Payment details
+          </h3>
+
+          <div class="confirmation-details">
+
+            <div>
+              <span>PAYMENT ID</span>
+              <strong>{{ paymentDetails.paymentId }}</strong>
+            </div>
+
+            <div>
+              <span>PAYMENT STATUS</span>
+              <strong>{{ paymentDetails.status }}</strong>
+            </div>
+
+            <div>
+              <span>PAYMENT METHOD</span>
+              <strong>{{ paymentDetails.paymentMethod }}</strong>
+            </div>
+
+          </div>
+
+        }
+
+
+        <!-- BOOK ANOTHER SEAT -->
+        <button
+          type="button"
+          class="primary-button another-booking"
+
+          (click)="startAnotherBooking()"
+
+          [disabled]="isCheckingOut()">
+
+          Book another seat →
+
+        </button>
+       <a
+  href="http://localhost:4202/user-dashboard?userId=2"
+  class="back-button">
+  Return to My Dashboard →
+</a>
+
+      </section>
+}    }
+
+  </main>
+
+
+  <!-- FOOTER -->
+  <footer class="footer">
+
+    <span>© SmartTicket</span>
+
+    <span>MADE FOR BETTER EXPERIENCES</span>
+
+  </footer>
+
+</div>
